@@ -1,6 +1,6 @@
 # Convert Chrome cookies to Netscape format
 
-This is a very simple Node.js script to convert the cookies you can copy/paste from Chrome's Application -> Storage -> Cookies, into the Netscape cookies format accepted by tools like `curl` and `youtube-dl`.
+This is a very simple Node.js script to convert the cookies you can copy/paste from Chrome's Application -> Storage -> Cookies, into the [Netscape cookies format](https://curl.haxx.se/docs/http-cookies.html) accepted by tools like `curl` and `youtube-dl`.
 
 It's useful because you don't have to install any browser extension in order to save or convert the cookies. [Browser extensions are a known security risk.](https://www.howtogeek.com/188346/why-browser-extensions-can-be-dangerous-and-how-to-protect-yourself/)
 
