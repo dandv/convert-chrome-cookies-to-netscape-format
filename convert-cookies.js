@@ -3,20 +3,33 @@
  * into the Netscape cookies format used by tools like `curl` or `youtube-dl`.
  */
 const fs = require('fs');
+const path = require('path');
 
-const filename = process.argv[2];
-if (!filename) {
-  console.error(`Usage: node convert-cookies.js <file-with-cookies-copy-pasted-from-Chrome.txt> > netscape-cookies.txt`);
-  console.error();
-  console.error(`Make sure to replace <file-with-cookies-copy-pasted-from-Chrome.txt> with the name of the\nfile in which you copy/pasted the cookies from Chrome's Application -> Storage -> Cookies.`);
-  console.error(`\nThen, pass the 'netscape-cookies.txt' file to 'curl' or 'youtube-dl' or any other tool\nthat reads cookies in the Netscape cookies format.`);
+const scriptName = path.basename(process.argv[1]);
+const inputFilePath = process.argv[2];
+const outputFilePath = process.argv[3];
+
+if (!inputFilePath) {
+  console.error(`\nUsages:\n\tnode ${scriptName} input_file\n\tnode ${scriptName} input_file output_file\n`);
+  console.error(`Make sure to replace input_file with the path of the file in which you copied`);
+  console.error(`& pasted the cookies from Chrome's Application -> Storage -> Cookies table.`);
+  console.error(`Pass the resultant file to 'curl' or 'youtube-dl' or any other tool that reads`);
+  console.error(`cookies in the Netscape cookies format.\n`);
   process.exit(1);
 }
 
-const content = fs.readFileSync(filename, 'utf8');
+const content = fs.readFileSync(inputFilePath, 'utf8');
 const cookies = content.split('\n');
 
-console.log('# Netscape HTTP Cookie File');
+const headComment = '# Netscape HTTP Cookie File';
+var outputFileStream;
+if (outputFilePath) {
+  outputFileStream = fs.createWriteStream(outputFilePath);
+  outputFileStream.write(headComment);
+  outputFileStream.write('\n');
+} else {
+  console.log(headComment);
+}
 
 for (const cookie of cookies) {
   let [name, value, domain, path, expiration, /* size */, httpOnly] = cookie.split('\t');
@@ -28,5 +41,11 @@ for (const cookie of cookies) {
   if (expiration === 'Session')
     expiration = new Date(Date.now() + 86400 * 1000);
   expiration = Math.trunc(new Date(expiration).getTime() / 1000);
-  console.log([domain, 'TRUE', path, httpOnly, expiration, name, value].join('\t'));
+  resultRecord = [domain, 'TRUE', path, httpOnly, expiration, name, value].join('\t');
+  if (outputFileStream) {
+    outputFileStream.write(resultRecord);
+    outputFileStream.write('\n');
+  } else {
+    console.log(resultRecord);
+  }
 }
