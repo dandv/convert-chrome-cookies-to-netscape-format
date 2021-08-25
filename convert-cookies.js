@@ -19,14 +19,25 @@ const cookies = content.split('\n');
 console.log('# Netscape HTTP Cookie File');
 
 for (const cookie of cookies) {
-  let [name, value, domain, path, expiration, /* size */, httpOnly] = cookie.split('\t');
-  if (!name)
+  let cookieCols = cookie.split('\t');
+  if (cookieCols.length < 7) {
+    // Current cookie record has an insufficient number of columns.
+    console.error(`Insufficient num. columns in cookie:\n"${cookie}"`);
     continue;
-  if (domain.charAt(0) !== '.')
+  }
+  let [name, value, domain, path, expiration, size, httpOnly] = cookieCols;
+  if (!name) {
+    // Current cookie record resulted in an undefined string post-split (likely invalid format).
+    console.error(`Invalid format of cookie:\n"${cookie}"`);
+    continue;
+  }
+  if (domain.charAt(0) !== '.') {
     domain = '.' + domain;
+  }
   httpOnly = httpOnly === '✓' ? 'TRUE' : 'FALSE'
-  if (expiration === 'Session')
+  if (expiration === 'Session') {
     expiration = new Date(Date.now() + 86400 * 1000);
+  }
   expiration = Math.trunc(new Date(expiration).getTime() / 1000);
   console.log([domain, 'TRUE', path, httpOnly, expiration, name, value].join('\t'));
 }
